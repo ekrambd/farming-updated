@@ -2,6 +2,7 @@
  use App\Models\Farmercategory;
  use App\Models\Farmersubcategory;
  use App\Models\Farmeritem;
+ use App\Models\Charge;
 
  function user()
  {
@@ -21,6 +22,12 @@
  	return $subcategories;
  }
 
+ function item($id)
+ {
+ 	$item = Farmeritem::findorfail($id);
+ 	return $item;
+ }
+
  function itemPrice($id)
 {
 	$item = Farmeritem::find($id);
@@ -38,4 +45,10 @@
     $finalAmount = $item->price - $discount_amount; 
 
     return $finalAmount;
+}
+
+function charge()
+{
+	$data = Charge::find(1);
+	return $data;
 }

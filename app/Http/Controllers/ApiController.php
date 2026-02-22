@@ -15,6 +15,9 @@ use App\Models\Farmerimage;
 use Validator;
 use Auth;
 use DB;
+use Hash;
+use App\Models\Order;
+use App\Models\Orderdetail;
 
 class ApiController extends Controller
 {
@@ -740,5 +743,191 @@ class ApiController extends Controller
         }
     }
 
+
+    public function changePassword(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'new_password' => 'required',
+                'confirm_password' => 'required|same:new_password',
+                'current_password' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $user = user();
+            //$message = $user->changePassword($request,$user);
+
+            if (!Hash::check($request->current_password, $user->password)) {
+            
+               return response()->json(['status'=>false, 'message'=>"The current password is incorrect"],400);
+            } 
+
+            $user->password = Hash::make($request->new_password);
+            $user->update();
+
+            return response()->json(['status'=>true, 'message'=>"Your password has been changed"],200);
+
+        }catch(Exception $e){
+            return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
+        }
+    }
+
+    public function farmerProfileUpdate(Request $request)
+    {   
+        DB::beginTransaction();
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'full_name' => 'required|string|max:50',
+                'email' => 'nullable|email',
+                'phone' => 'required',
+                'farmercategory_id' => 'required|integer|exists:farmercategories,id',
+                'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
+                'address' => 'nullable',
+                'profile_image' => 'nullable',
+                'nid_passport' => 'required|string',
+                'nid_front_photo' => 'nullable',
+                'nid_back_photo' => 'nullable',
+                'trade_license_photo' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $user = user();
+
+            if ($request->file('profile_image')) {
+                $file = $request->file('profile_image');
+                $name = time() . "profile_". $file->getClientOriginalName();
+                $file->move(public_path() . '/uploads/farmers/', $name);
+                unlink(public_path($user->image_path));
+                $path = 'uploads/farmers/' . $name;
+            }else{
+                $path = $user->image_path;
+            }
+
+            
+
+            $user->full_name = $request->full_name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->image_path = $path;
+            $user->update();
+
+            $info = Userinfo::where('user_id',$user->id)->first();
+
+            if ($request->file('nid_front_photo')) {
+                $file = $request->file('nid_front_photo');
+                $name = time() ."nid_front_". $file->getClientOriginalName();
+                $file->move(public_path() . '/uploads/farmers/', $name);
+                unlink(public_path($info->nid_front_photo));
+                $nidFrontPhoto = 'uploads/farmers/' . $name;
+            }else{
+                $nidFrontPhoto = $info->nid_front_photo;
+            }
+
+
+            if ($request->file('nid_back_photo')) {
+                $file = $request->file('nid_back_photo');
+                $name = time() . "nid_back_". $file->getClientOriginalName();
+                $file->move(public_path() . '/uploads/farmers/', $name);
+                $nidBackPhoto = 'uploads/farmers/' . $name;
+                unlink(public_path($info->nid_back_photo));
+            }else{
+                $nidBackPhoto = $info->nid_back_photo;
+            }
+
+
+            if ($request->file('trade_license_photo')) {
+                $file = $request->file('trade_license_photo');
+                $name = time() ."trade_license_". $file->getClientOriginalName();
+                $file->move(public_path() . '/uploads/farmers/', $name);
+                $nidTradeLicensePhoto = 'uploads/farmers/' . $name;
+                unlink(public_path($info->trade_license_photo));
+            }else{
+                $nidTradeLicensePhoto = $info->trade_license_photo;
+            }
+
+            $info->farmercategory_id = $request->farmercategory_id;
+            $info->farmersubcategory_id = $request->farmersubcategory_id;
+            $info->businees_location = $request->businees_location;
+            $info->businees_address = $request->businees_address;
+            $info->nid_passport = $request->nid_passport;
+            $info->nid_front_photo = $nidFrontPhoto;
+            $info->nid_back_photo = $nidBackPhoto;
+            $info->trade_license_photo = $nidTradeLicensePhoto;
+            $info->update();
+
+            DB::commit();
+
+            return response()->json(['status'=>true, 'message'=>'Successfully profile updated']);
+
+        }catch(Exception $e){
+
+            DB::rollback();
+            return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
+        }
+    }
+
+    public function saveOrder(Request $request)
+    {   
+        date_default_timezone_set("Asia/Dhaka");
+        DB::beginTransaction();
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'farmeritem_id' => 'required|integer|exists:farmeritems,id',
+                'data' => 'required|array|min:1',
+                'payment_method' => 'required|in:cod,bkash,rocket,nagad',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $order = new Order();
+            $order->user_id = user()->id;
+            $order->delivery_charge = charge()->delivery_charge;
+            $order->vat_tax = charge()->vat_tax;
+            $order->date = date('Y-m-d');
+            $order->time = date('h:i:s a');
+            $order->month = date('F');
+            $order->year = date('Y');
+            $order->timestamp = time();
+            $order->status = 'pending';
+            $order->payment_method = $request->payment_method;
+            $order->save();
+
+            $odata = new Orderdetail();
+            $odata->order_id = $order->id;
+            $odata->items = json_encode($request->data);
+            $odata->save();
+
+            DB::commit();
+
+            return response()->json(['status'=>true, 'order_id'=>intval($order->id), 'message'=>'Successfully an order has been received we will contact to you soon']); 
+
+        }catch(Exception $e){
+            DB::rollback();
+            return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
+        }
+    }
 
 }

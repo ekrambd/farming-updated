@@ -47,5 +47,14 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		Route::post('/update-item/{id}', [ApiController::class, 'updateItem']);
 		Route::get('/delete-item/{id}', [ApiController::class, 'deleteItem']); 
 		Route::get('/single-image-delete/{id}', [ApiController::class, 'deleteItemImage']);
+
+		//change password
+		Route::post('change-password', [ApiController::class, 'changePassword']);
+
+		//farmer profile update
+		Route::post('farmer-profile-update', [ApiController::class, 'farmerProfileUpdate']);
+
+		//orders
+		Route::post('save-order', [ApiController::class, 'saveOrder']);
 	});
 });
