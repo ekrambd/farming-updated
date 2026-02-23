@@ -56,5 +56,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
 		//orders
 		Route::post('save-order', [ApiController::class, 'saveOrder']);
+		Route::post('order-lists', [ApiController::class, 'orderLists']);
+		Route::get('/order-details/{id}', [ApiController::class, 'orderDetails']);
 	});
 });

@@ -408,7 +408,7 @@ class ApiController extends Controller
                 'description' => 'required',
                 'featured_image' => 'required|image',
                 'status' => 'required|in:Active,Inactive',
-                'images' => 'required|array',
+                'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
             ]);
 
@@ -889,7 +889,7 @@ class ApiController extends Controller
         try
         {
             $validator = Validator::make($request->all(), [
-                'farmeritem_id' => 'required|integer|exists:farmeritems,id',
+                //'farmeritem_id' => 'required|integer|exists:farmeritems,id',
                 'data' => 'required|array|min:1',
                 'payment_method' => 'required|in:cod,bkash,rocket,nagad',
             ]);
@@ -927,6 +927,80 @@ class ApiController extends Controller
         }catch(Exception $e){
             DB::rollback();
             return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
+        }
+    }
+
+    public function orderLists(Request $request)
+    {
+        try {
+
+            $query = Order::query();
+
+            // if ($request->has('search') && !empty($request->search)) {
+            //     $search = $request->search;
+            //     $query->where('category_name', 'LIKE', "%{$search}%")->orWhere('category_name_bn', 'LIKE', "%{$search}%");
+            // }
+
+            // $query->where('status', 'Active');
+
+
+            // $query->with(['farmersubcategories' => function ($q) {
+            //     $q->where('status', 'Active');
+            // }]);
+
+            if($request->has('from_date'))
+            {
+                $query->where('date','>=',$request->from_date);
+            }
+
+            if($request->has('to_date'))
+            {
+                $query->where('date', '<=', $request->to_date);
+            }
+
+            if($request->has('status'))
+            {
+                $query->where('status',$request->status);
+            }
+
+            if ($request->is_paginate == 1) {
+
+                $per_page = $request->per_page ?? 10;
+
+                $data = $query->latest()->paginate($per_page);
+
+            } else {
+
+                $data = $query->latest()->get();
+            }
+
+            return response()->json([
+                'status' => true,
+                'data'   => $data
+            ]);
+
+        } catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function orderDetails($id)
+    {
+        try
+        {
+            return $id;
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
