@@ -715,7 +715,11 @@ class ApiController extends Controller
         try
         {
             $data = Farmerimage::findorfail($id);
-            unlink(public_path($data->image_path));
+            if(file_exists(public_path($data->image_path)))
+            {
+                unlink(public_path($data->image_path));
+            }
+            //unlink(public_path($data->image_path));
             $data->delete();
             return response()->json(['status'=>true, 'message'=>'Successfully the image has been deleted']);
         }catch(Exception $e){
