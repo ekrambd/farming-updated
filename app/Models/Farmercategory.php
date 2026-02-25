@@ -9,15 +9,20 @@ class Farmercategory extends Model
 {
     use HasFactory;
 
-    public function farmeritems()
-    {
-    	return $this->hasMany(Farmeritem::class);
-    }
+    // public function farmeritems()
+    // {
+    // 	return $this->hasMany(Farmeritem::class);
+    // }
 
     public function farmersubcategories()
     {
     	return $this->hasMany(Farmersubcategory::class);
     }
     
+
+    public function farmeritems()
+	{
+	    return $this->belongsToMany(Farmeritem::class);
+	}
     
 }

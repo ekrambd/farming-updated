@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('farmerunit_id');
-            $table->integer('farmercategory_id');
-            $table->integer('farmersubcategory_id')->nullable();
+            // $table->integer('farmercategory_id');
+            // $table->integer('farmersubcategory_id')->nullable();
             $table->string('item_name');
             $table->string('item_name_bn');
             $table->string('price');

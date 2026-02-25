@@ -14,8 +14,8 @@ class Farmeritem extends Model
     protected $fillable = [
         'user_id',
         'farmerunit_id',
-        'farmercategory_id',
-        'farmersubcategory_id',
+        // 'farmercategory_id',
+        // 'farmersubcategory_id',
         'item_name',
         'item_name_bn',
         'price',
@@ -31,15 +31,15 @@ class Farmeritem extends Model
         return $this->hasMany(Farmerimage::class, 'farmeritem_id');
     }
 
-    public function farmercategory()
-    {
-    	return $this->belongsTo(Farmercategory::class);
-    }
+    // public function farmercategory()
+    // {
+    // 	return $this->belongsTo(Farmercategory::class);
+    // }
 
-    public function farmersubcategory()
-    {
-    	return $this->belongsTo(Farmersubcategory::class);
-    }
+    // public function farmersubcategory()
+    // {
+    // 	return $this->belongsTo(Farmersubcategory::class);
+    // }
 
     public function getDiscountPriceAttribute()
     {
@@ -51,4 +51,15 @@ class Farmeritem extends Model
     {
         return $this->belongsTo(Farmerunit::class);
     }
+
+    public function farmercategories()
+    {
+        return $this->belongsToMany(Farmercategory::class);
+    }
+
+    public function farmersubcategories()
+    {
+        return $this->belongsToMany(Farmersubcategory::class)->withTimestamps();
+    }
+
 }

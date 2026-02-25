@@ -400,8 +400,10 @@ class ApiController extends Controller
                 'item_name' => 'required|string|max:50',
                 'item_name_bn' => 'required|string|max:50',
                 'farmerunit_id' => 'required|integer|exists:farmerunits,id',
-                'farmercategory_id' => 'required|integer|exists:farmercategories,id',
-                'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
+                // 'farmercategory_id' => 'required|integer|exists:farmercategories,id',
+                // 'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
+                'categories' => 'required|array|min:1',
+                'subcategories' => 'nullable|array|min:1',
                 'price' => 'required|numeric',
                 'discount' => 'nullable|numeric',
                 'stock_qty' => 'required|numeric',
@@ -430,8 +432,8 @@ class ApiController extends Controller
             $item = Farmeritem::create([
                 'user_id' => user()->id,
                 'farmerunit_id' => $request->farmerunit_id,
-                'farmercategory_id' => $request->farmercategory_id,
-                'farmersubcategory_id' => $request->farmersubcategory_id,
+                // 'farmercategory_id' => $request->farmercategory_id,
+                // 'farmersubcategory_id' => $request->farmersubcategory_id,
                 'item_name' => $request->item_name,
                 'item_name_bn' => $request->item_name_bn,
                 'price' => $request->price,
@@ -439,7 +441,7 @@ class ApiController extends Controller
                 'stock_qty' => $request->stock_qty,
                 'description' => $request->description,
                 'featured_image' => $featuredImage,
-                'status' => $request->status,
+                'status' => $request->status, 
             ]);
 
             // Multiple Images Upload
@@ -454,6 +456,14 @@ class ApiController extends Controller
                         'image_path' => 'uploads/items/images/' . $imageName
                     ]);
                 }
+            }
+
+
+            $item->farmercategories()->attach($request->categories);
+
+            if($request->has('subcategories'))
+            {
+                $item->farmersubcategories()->attach($request->subcategories);
             }
 
             DB::commit();
@@ -511,7 +521,7 @@ class ApiController extends Controller
 
             } else {
 
-                $data = $query->with('farmercategory','farmersubcategory','farmerunit')->where('user_id',user()->id)->latest()->get();
+                $data = $query->with('farmercategories','farmersubcategories','farmerunit')->where('user_id',user()->id)->latest()->get();
             }
 
             return response()->json([
@@ -533,7 +543,7 @@ class ApiController extends Controller
     {
         try
         {
-            $data = Farmeritem::with('farmercategory','farmersubcategory','farmerunit','images')->findorfail($id);
+            $data = Farmeritem::with('farmercategories','farmersubcategories','farmerunit','images')->findorfail($id);
             return response()->json(['status'=>true, 'data'=>$data]);
         }catch (Exception $e) {
 
@@ -557,8 +567,10 @@ class ApiController extends Controller
                 'item_name' => 'required|string|max:50',
                 'item_name_bn' => 'required|string|max:50',
                 'farmerunit_id' => 'required|integer|exists:farmerunits,id',
-                'farmercategory_id' => 'required|integer|exists:farmercategories,id',
-                'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
+                // 'farmercategory_id' => 'required|integer|exists:farmercategories,id',
+                // 'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
+                'categories' => 'required|array|min:1',
+                'subcategories' => 'nullable|array|min:1',
                 'price' => 'required|numeric',
                 'discount' => 'nullable|numeric',
                 'stock_qty' => 'required|numeric',
@@ -604,8 +616,8 @@ class ApiController extends Controller
 
             $item->update([
                 'farmerunit_id' => $request->farmerunit_id,
-                'farmercategory_id' => $request->farmercategory_id,
-                'farmersubcategory_id' => $request->farmersubcategory_id,
+                // 'farmercategory_id' => $request->farmercategory_id,
+                // 'farmersubcategory_id' => $request->farmersubcategory_id,
                 'item_name' => $request->item_name,
                 'item_name_bn' => $request->item_name_bn,
                 'price' => $request->price,
@@ -632,6 +644,13 @@ class ApiController extends Controller
                         'image_path' => 'uploads/items/images/' . $imageName
                     ]);
                 }
+            }
+
+            $item->farmercategories()->sync($request->categories);
+
+            if($request->has('subcategories'))
+            {
+                $item->farmersubcategories()->sync($request->subcategories);
             }
 
             DB::commit();
@@ -683,6 +702,9 @@ class ApiController extends Controller
 
                 $image->delete();
             }
+
+            $item->farmercategories()->detach();
+            $item->farmersubcategories()->detach();
 
             /*
             ===============================
