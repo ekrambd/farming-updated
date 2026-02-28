@@ -1049,7 +1049,7 @@ class ApiController extends Controller
     {
         try
         {
-            $order = Order::with('orderdetails')findorfail($id);
+            $order = Order::with('orderdetails')->findorfail($id);
             return response()->json(['status'=>true, 'data'=>$order]); 
         }catch (Exception $e) {
 
