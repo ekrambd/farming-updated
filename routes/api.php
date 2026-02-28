@@ -58,5 +58,11 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		Route::post('save-order', [ApiController::class, 'saveOrder']);
 		Route::post('order-lists', [ApiController::class, 'orderLists']);
 		Route::get('/order-details/{id}', [ApiController::class, 'orderDetails']);
+		Route::post('order-status-change', [ApiController::class, 'orderStatusChange']);
+		Route::get('/order-delete/{id}', [ApiController::class, 'orderDelete']);
+
+		Route::get('/notification-lists', [ApiController::class, 'notificationLists']);
+		Route::post('notification-status-read', [ApiController::class, 'notificationStatusRead']);
+		Route::post('farmer-dashboard', [ApiController::class, 'farmerDashboard']);
 	});
 });

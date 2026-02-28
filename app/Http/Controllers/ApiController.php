@@ -18,6 +18,8 @@ use DB;
 use Hash;
 use App\Models\Order;
 use App\Models\Orderdetail;
+use App\Models\Notification;
+use App\Models\Orderlog;
 
 class ApiController extends Controller
 {
@@ -918,6 +920,7 @@ class ApiController extends Controller
                 //'farmeritem_id' => 'required|integer|exists:farmeritems,id',
                 'data' => 'required|array|min:1',
                 'payment_method' => 'required|in:cod,bkash,rocket,nagad',
+                'order_total' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
@@ -938,6 +941,7 @@ class ApiController extends Controller
             $order->year = date('Y');
             $order->timestamp = time();
             $order->status = 'pending';
+            $order->order_total = $request->order_total;
             $order->payment_method = $request->payment_method;
             $order->save();
 
@@ -945,6 +949,32 @@ class ApiController extends Controller
             $odata->order_id = $order->id;
             $odata->items = json_encode($request->data);
             $odata->save();
+
+            $items = json_decode($odata->items,true);
+
+            foreach($items as $item)
+            {
+                $notification = new Notification();
+                $notification->user_id = $item['user_id'];
+                $notification->order_id = $order->id;
+                $notification->title = "New Order Received";
+                $notification->sub_title = "Order ID is #$order->id. Please check the order's details";
+                $notification->status = 'unread';
+                $notification->time = time();
+                $notification->save();
+
+                $log = new Orderlog();
+                $log->user_id = $item['user_id'];
+                $log->order_id = $order->id;
+                $log->item_id = $item['id'];
+                $log->qty = $item['qty'];
+                $log->price = $item['price'];
+                $log->unit_total = $item['unit_total'];
+                $log->save();
+
+            }    
+
+            
 
             DB::commit();
 
@@ -1019,7 +1049,113 @@ class ApiController extends Controller
     {
         try
         {
-            return $id;
+            $order = Order::with('orderdetails')findorfail($id);
+            return response()->json(['status'=>true, 'data'=>$order]); 
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function orderStatusChange(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'order_id' => 'required|integer|exists:orders,id',
+                'status' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $user = user();
+            if($user->role != 'farmer')
+            {
+                return response()->json(['status'=>false, 'order_id'=>0, 'message'=>'You are not allowed to change the stauts'],400);
+            }
+
+            $order = Order::findorfail($request->order_id);
+            $order->status = $request->status;
+            $order->update();
+
+            return response()->json(['status'=>true, 'order_id'=>intval($order->id), 'message'=>"Successfully the order's status updated"]);
+
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function orderDelete($id)
+    {
+        try
+        {
+            $order = Order::findorfail($request->order_id);
+            $order->orderdetails()->delete();
+            $order->delete();
+            return response()->json(['status'=>true, 'message'=>'Successfully the order has been deleted']);
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function notificationLists()
+    {
+        try
+        {
+            $notifications = Notification::where('user_id',user()->id)->latest()->get();
+            return response()->json(['status'=>count($notifications), 'data'=>$notifications]);
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function notificationStatusRead(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'notification_id' => 'required|integer|exists:notifications,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $noty = Notification::findorfail($request->notification_id);
+            $noty->status = 'read';
+            $noty->save();
+
+            return response()->json(['status'=>true, 'message'=>'Successfully updated']);
+
         }catch (Exception $e) {
 
             return response()->json([
