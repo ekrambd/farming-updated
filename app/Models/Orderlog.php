@@ -14,9 +14,8 @@ class Orderlog extends Model
     	return $this->belongsTo(Order::class);
     }
 
-    public function item()
-    {
-        //return $this->belongsTo(FarmerItem::class, 'farmeritem_id');
-        return $this->hasOne(Farmeritem::class,'id');
-    }
+    public function farmeritem()
+	{
+	    return $this->belongsTo(Farmeritem::class, 'item_id');
+	}
 }
