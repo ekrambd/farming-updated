@@ -315,7 +315,7 @@ class ApiController extends Controller
 
             DB::commit();
 
-            $data = array('user'=>$user->load('categories'), 'info'=>$info);
+            $data = array('user'=>$user, 'info'=>$info);
 
             return response()->json(['status'=>true, 'message'=>'Successfully Signup', 'data'=>$data]);
 
