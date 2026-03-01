@@ -1258,7 +1258,6 @@ class ApiController extends Controller
                     'farmersubcategories',
                     'farmerunit',
                     'images',
-                    'orderlog'
                 ])->whereNotNull('discount')
                 ->where('status', 'Active')
                 ->latest()
@@ -1270,8 +1269,8 @@ class ApiController extends Controller
                     'farmercategories',
                     'farmersubcategories',
                     'farmerunit',
-                    'images',
-                    'orderlog'
+                    'images'
+                    //'orderlog'
                 ])
                 ->get()
                 ->transform(function ($item) {
@@ -1287,8 +1286,8 @@ class ApiController extends Controller
                     'farmercategories',
                     'farmersubcategories',
                     'farmerunit',
-                    'images',
-                    'orderlog'
+                    'images'
+                    //'orderlog'
                 ])->orderBy('hit_count', 'desc')
                 ->limit(4)
                 ->get();
