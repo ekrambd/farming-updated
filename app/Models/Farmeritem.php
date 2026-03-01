@@ -31,7 +31,7 @@ class Farmeritem extends Model
         return $this->hasMany(Farmerimage::class, 'farmeritem_id');
     }
 
-    public function orderlogs()
+    public function orderlog()
     {
         return $this->belongsTo(Orderlog::class, 'item_id');
     }
