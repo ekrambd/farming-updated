@@ -215,6 +215,8 @@ class ApiController extends Controller
                 'nid_passport' => 'required|numeric',
                 'confirm_password' => 'required|string|same:password',
                 'categories' => 'required'
+                // 'categories' => 'required|array',
+                // 'categories.*' => 'exists:farmercategories,id'
             ]);
 
             if ($validator->fails()) {
@@ -225,8 +227,8 @@ class ApiController extends Controller
                 ], 422);  
             }
 
-            var_dump($request->categories);
-            exit();
+            // var_dump($request->categories);
+            // exit();
 
             $emailCheck = User::where('email', $request->email)->first();
             $phoneCheck = User::where('phone', $request->phone)->first();
@@ -312,8 +314,10 @@ class ApiController extends Controller
             $info->save();
 
             if($request->has('categories'))
-            {
-                $user->farmercategories()->attach($request->categories);
+            {   
+                $categories = explode(",",$request->categories);
+                //return $categories;
+                $user->farmercategories()->attach($categories);
             }
 
             DB::commit();
