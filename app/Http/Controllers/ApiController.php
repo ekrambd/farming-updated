@@ -1059,16 +1059,16 @@ class ApiController extends Controller
                 return response()->json(['status'=>false, 'message'=>'Invalid User', 'data'=>array()],400);
             }
 
-            $query = Orderlog::query();
+            $query = Order::query();
 
             if($request->has('from_date'))
             {
-                $query->whereDate('created_at','>=',$request->from_date);
+                $query->whereDate('date','>=',$request->from_date);
             }
 
             if($request->has('to_date'))
             {
-                $query->whereDate('created_at', '<=', $request->to_date);
+                $query->whereDate('date', '<=', $request->to_date);
             }
 
 
@@ -1076,11 +1076,11 @@ class ApiController extends Controller
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmeritem')->latest()->where('user_id',user()->id)->paginate($per_page);
+                $data = $query->with('orderlogs.farmeritem')->latest()->where('user_id',user()->id)->paginate($per_page);
 
             } else {
 
-                $data = $query->with('farmeritem')->latest()->where('user_id',user()->id)->get();
+                $data = $query->with('orderlogs.farmeritem')->latest()->where('user_id',user()->id)->get();
             }
 
             return response()->json([
