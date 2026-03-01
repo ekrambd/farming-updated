@@ -1253,7 +1253,13 @@ class ApiController extends Controller
         try
         {
             // Best deal items (discounted)
-            $bestDell = Farmeritem::whereNotNull('discount')
+            $bestDell = Farmeritem::with([
+                    'farmercategories',
+                    'farmersubcategories',
+                    'farmerunit',
+                    'images',
+                    'orderlog'
+                ])->whereNotNull('discount')
                 ->where('status', 'Active')
                 ->latest()
                 ->limit(9)
@@ -1277,12 +1283,16 @@ class ApiController extends Controller
                 ->take(9)
                 ->values();
 
-            // Popular products
-            $popularProducts = Farmeritem::orderBy('hit_count', 'desc')
+            $popularProducts = Farmeritem::with([
+                    'farmercategories',
+                    'farmersubcategories',
+                    'farmerunit',
+                    'images',
+                    'orderlog'
+                ])->orderBy('hit_count', 'desc')
                 ->limit(4)
                 ->get();
 
-            // Farmers with items
             $farmers = User::where('role', 'farmer')
                 ->whereHas('farmeritems')
                 ->limit(9)
