@@ -31,6 +31,11 @@ class Farmeritem extends Model
         return $this->hasMany(Farmerimage::class, 'farmeritem_id');
     }
 
+    public function orderlogs()
+    {
+        return $this->hasMany(Orderlog::class, 'item_id');
+    }
+
     // public function farmercategory()
     // {
     // 	return $this->belongsTo(Farmercategory::class);

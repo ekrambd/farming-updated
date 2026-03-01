@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Orderlog extends Model
 {
     use HasFactory;
+
+    public function order()
+    {
+    	return $this->belongsTo(Order::class);
+    }
+
+    public function farmeritem()
+    {
+        return $this->belongsTo(FarmerItem::class, 'farmeritem_id');
+    }
 }
