@@ -1081,7 +1081,7 @@ class ApiController extends Controller
     {
         try
         {
-            $order = Order::with('orderdetails')->findorfail($id);
+            $order = Order::with('orderlogs.farmeritem')->findorfail($id);
             return response()->json(['status'=>true, 'data'=>$order]); 
         }catch (Exception $e) {
 
@@ -1156,7 +1156,7 @@ class ApiController extends Controller
         try
         {
             $notifications = Notification::where('user_id',user()->id)->latest()->get();
-            return response()->json(['status'=>count($notifications), 'data'=>$notifications]);
+            return response()->json(['status'=>count($notifications) > 0, 'data'=>$notifications]);
         }catch (Exception $e) {
 
             return response()->json([
