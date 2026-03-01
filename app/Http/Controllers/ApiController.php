@@ -293,7 +293,7 @@ class ApiController extends Controller
             $user->phone = $request->phone;
             $user->password = bcrypt($request->password);
             $user->status = 'Active';
-            $user->profile_image = $path;
+            $user->image_path = $path;
             $user->save();
 
             $info = new Userinfo();
