@@ -1138,7 +1138,7 @@ class ApiController extends Controller
     {
         try
         {
-            $order = Order::findorfail($request->order_id);
+            $order = Order::findorfail($id);
             $order->orderdetails()->delete();
             $order->orderlogs()->delete();
             $order->delete();
