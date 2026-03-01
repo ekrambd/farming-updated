@@ -23,6 +23,7 @@ class Farmeritem extends Model
         'stock_qty',
         'description',
         'featured_image',
+        'hit_count',
         'status',
     ];
 
@@ -65,6 +66,11 @@ class Farmeritem extends Model
     public function farmersubcategories()
     {
         return $this->belongsToMany(Farmersubcategory::class)->withTimestamps();
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 }

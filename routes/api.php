@@ -36,6 +36,8 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		Route::post('farmer-signout', [ApiController::class, 'farmerSignOut']);
 		
 		Route::get('/farmer-details/{id}', [ApiController::class, 'farmerDetails']);
+
+		Route::get('/home-page-items', [ApiController::class, 'homePageItems']);
 		
 		//sliders
 		Route::get('/sliders', [ApiController::class, 'sliders']);

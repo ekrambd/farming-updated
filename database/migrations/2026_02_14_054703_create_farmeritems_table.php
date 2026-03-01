@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('price');
             $table->string('discount')->default('0')->nullable();
             $table->string('stock_qty');
+            $table->integer('hit_conunt')->default('0');
             $table->text('description');
             $table->string('featured_image');
             $table->enum('status', ['Active', 'Inactive']);

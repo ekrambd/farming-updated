@@ -455,6 +455,7 @@ class ApiController extends Controller
                 'discount' => $request->discount,
                 'stock_qty' => $request->stock_qty,
                 'description' => $request->description,
+                'hit_count' => 0,
                 'featured_image' => $featuredImage,
                 'status' => $request->status, 
             ]);
@@ -1237,6 +1238,35 @@ class ApiController extends Controller
            return response()->json(['status'=>true, 'data'=>$data]);
 
 
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function homePageItems(Request $request)
+    {
+        try
+        {
+            $bestDell = Farmeritem::where('discount','!=',NULL)->where('status','Active')->latest()->limit(9);
+            $bestSell = Farmeritem::with([
+                    'farmercategories',
+                    'farmersubcategories',
+                    'farmerunit',
+                    'images'
+                ])
+                ->withSum(['orderlogs' => function ($q) {
+                    $q->where('user_id', user()->id);
+                }], 'unit_total')
+                ->orderByDesc('orderlogs_sum_unit_total')
+                ->limit(9)->get();
+            $popularProducts = Farmeritem::orderBy('hit_count','desc')->limit(4)->get();
+            $farmers = User::where('role','farmer')->whereHas('farmeritems')->limit(9)->get();
+            return response()->json(['status'=>true, 'data'=>array('best_deal'=>$bestDell, 'best_sell'=>$bestSell, 'popularProducts'=>$popularProducts, 'farmers'=>$farmers)]);
         }catch (Exception $e) {
 
             return response()->json([
