@@ -771,7 +771,8 @@ class ApiController extends Controller
         {
             $farmer = User::with([
                 'userinfo.farmercategory',
-                'userinfo.farmersubcategory'
+                'userinfo.farmersubcategory',
+                'farmercategories'
             ])->findOrFail($id);
             
             return response()->json([
