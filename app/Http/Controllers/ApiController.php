@@ -1014,46 +1014,6 @@ class ApiController extends Controller
     {
         try {
 
-            //$query = Order::query();
-
-            // if ($request->has('search') && !empty($request->search)) {
-            //     $search = $request->search;
-            //     $query->where('category_name', 'LIKE', "%{$search}%")->orWhere('category_name_bn', 'LIKE', "%{$search}%");
-            // }
-
-            // $query->where('status', 'Active');
-
-
-            // $query->with(['farmersubcategories' => function ($q) {
-            //     $q->where('status', 'Active');
-            // }]);
-
-            // if($request->has('from_date'))
-            // {
-            //     $query->where('date','>=',$request->from_date);
-            // }
-
-            // if($request->has('to_date'))
-            // {
-            //     $query->where('date', '<=', $request->to_date);
-            // }
-
-            // if($request->has('status'))
-            // {
-            //     $query->where('status',$request->status);
-            // }
-
-            // if ($request->is_paginate == 1) {
-
-            //     $per_page = $request->per_page ?? 10;
-
-            //     $data = $query->latest()->paginate($per_page);
-
-            // } else {
-
-            //     $data = $query->latest()->get();
-            // }
-
             if(user()->role != 'farmer')
             {
                 return response()->json(['status'=>false, 'message'=>'Invalid User', 'data'=>array()],400);
@@ -1076,11 +1036,29 @@ class ApiController extends Controller
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('orderlogs.farmeritem')->latest()->paginate($per_page);
+                $data = $query
+                    ->whereHas('orderlogs', function ($q) {
+                        $q->where('user_id', user()->id);
+                    })
+                    ->with(['orderlogs' => function ($q) {
+                        $q->where('user_id', user()->id)
+                          ->with('farmeritem');
+                    }])
+                    ->latest()
+                    ->paginate($per_page);
 
             } else {
 
-                $data = $query->with('orderlogs.farmeritem')->latest()->get();
+                $data = $query
+                    ->whereHas('orderlogs', function ($q) {
+                        $q->where('user_id', user()->id);
+                    })
+                    ->with(['orderlogs' => function ($q) {
+                        $q->where('user_id', user()->id)
+                          ->with('farmeritem');
+                    }])
+                    ->latest()
+                    ->get();
             }
 
             return response()->json([
