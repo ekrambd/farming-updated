@@ -527,16 +527,26 @@ class ApiController extends Controller
                 $query->where('farmersubcategory_id',$request->subcategory_id);
             }
 
+            if(user()->role == 'farmer')
+            {
+                $query->where('user_id',user()->id);
+            }
+
+            if(user()->role != 'farmer')
+            {
+                $query->where('status','Active');
+            }
+
 
             if ($request->is_paginate == 1) {
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmercategory','farmersubcategory','farmerunit')->where('user_id',user()->id)->latest()->paginate($per_page);
+                $data = $query->with('farmercategory','farmersubcategory','farmerunit')->latest()->paginate($per_page);
 
             } else {
 
-                $data = $query->with('farmercategories','farmersubcategories','farmerunit')->where('user_id',user()->id)->latest()->get();
+                $data = $query->with('farmercategories','farmersubcategories','farmerunit')->latest()->get();
             }
 
             return response()->json([
