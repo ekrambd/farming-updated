@@ -1252,22 +1252,53 @@ class ApiController extends Controller
     {
         try
         {
-            $bestDell = Farmeritem::where('discount','!=',NULL)->where('status','Active')->latest()->limit(9);
+            // Best deal items (discounted)
+            $bestDell = Farmeritem::whereNotNull('discount')
+                ->where('status', 'Active')
+                ->latest()
+                ->limit(9)
+                ->get(); // note: ->get() missing before
+
+            // Best selling items (one-to-one orderlog)
             $bestSell = Farmeritem::with([
                     'farmercategories',
                     'farmersubcategories',
                     'farmerunit',
-                    'images'
+                    'images',
+                    'orderlog'
                 ])
-                ->withSum(['orderlogs' => function ($q) {
-                    $q->where('user_id', user()->id);
-                }], 'unit_total')
-                ->orderByDesc('orderlogs_sum_unit_total')
-                ->limit(9)->get();
-            $popularProducts = Farmeritem::orderBy('hit_count','desc')->limit(4)->get();
-            $farmers = User::where('role','farmer')->whereHas('farmeritems')->limit(9)->get();
-            return response()->json(['status'=>true, 'data'=>array('best_deal'=>$bestDell, 'best_sell'=>$bestSell, 'popularProducts'=>$popularProducts, 'farmers'=>$farmers)]);
-        }catch (Exception $e) {
+                ->get()
+                ->transform(function ($item) {
+                    // total sold (unit_total from orderlog)
+                    $item->total_sold = $item->orderlog ? (string) $item->orderlog->unit_total : '0';
+                    return $item;
+                })
+                ->sortByDesc('total_sold') // top selling first
+                ->take(9)
+                ->values();
+
+            // Popular products
+            $popularProducts = Farmeritem::orderBy('hit_count', 'desc')
+                ->limit(4)
+                ->get();
+
+            // Farmers with items
+            $farmers = User::where('role', 'farmer')
+                ->whereHas('farmeritems')
+                ->limit(9)
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'data' => [
+                    'best_deal' => $bestDell,
+                    'best_sell' => $bestSell,
+                    'popularProducts' => $popularProducts,
+                    'farmers' => $farmers
+                ]
+            ]);
+
+        } catch (Exception $e) {
 
             return response()->json([
                 'status'  => false,
