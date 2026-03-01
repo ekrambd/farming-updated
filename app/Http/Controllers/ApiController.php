@@ -213,7 +213,8 @@ class ApiController extends Controller
                 'phone' => 'nullable|string',
                 'password' => 'required|string',
                 'nid_passport' => 'required|numeric',
-                'confirm_password' => 'required|string|same:password'
+                'confirm_password' => 'required|string|same:password',
+                'categories' => 'required|array|min:1'
             ]);
 
             if ($validator->fails()) {
@@ -297,8 +298,8 @@ class ApiController extends Controller
 
             $info = new Userinfo();
             $info->user_id = $user->id;
-            $info->farmercategory_id = $request->farmercategory_id;
-            $info->farmersubcategory_id = $request->farmersubcategory_id;
+            // $info->farmercategory_id = $request->farmercategory_id;
+            // $info->farmersubcategory_id = $request->farmersubcategory_id;
             $info->businees_location = $request->businees_location;
             $info->businees_address = $request->businees_address;
             $info->nid_passport = $request->nid_passport;
@@ -307,9 +308,14 @@ class ApiController extends Controller
             $info->trade_license_photo = $nidTradeLicensePhoto;
             $info->save();
 
+            if($request->has('categories'))
+            {
+                $user->farmercategories()->attach($request->categories);
+            }
+
             DB::commit();
 
-            $data = array('user'=>$user, 'info'=>$info);
+            $data = array('user'=>$user->load('categories'), 'info'=>$info);
 
             return response()->json(['status'=>true, 'message'=>'Successfully Signup', 'data'=>$data]);
 

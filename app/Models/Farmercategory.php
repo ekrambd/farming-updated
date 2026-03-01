@@ -24,5 +24,10 @@ class Farmercategory extends Model
 	{
 	    return $this->belongsToMany(Farmeritem::class);
 	}
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
     
 }

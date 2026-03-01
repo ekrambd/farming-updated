@@ -46,5 +46,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Userinfo::class);
     }
+
+
+    public function farmercategories()
+    {
+        return $this->belongsToMany(Farmercategory::class)->withTimestamps();
+    }
     
 }
