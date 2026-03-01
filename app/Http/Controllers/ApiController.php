@@ -417,7 +417,7 @@ class ApiController extends Controller
                 'farmerunit_id' => 'required|integer|exists:farmerunits,id',
                 // 'farmercategory_id' => 'required|integer|exists:farmercategories,id',
                 // 'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
-                'categories' => 'required|array|min:1',
+                'categories' => 'required|',
                 'subcategories' => 'nullable|array|min:1',
                 'price' => 'required|numeric',
                 'discount' => 'nullable|numeric',
