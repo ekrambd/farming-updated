@@ -1057,7 +1057,7 @@ class ApiController extends Controller
                     })
                     ->with(['orderlogs' => function ($q) {
                         $q->where('user_id', user()->id)
-                          ->with('farmeritem');
+                          ->with('farmeritem.farmerunit');
                     }])
                     ->latest()
                     ->get();
@@ -1083,7 +1083,7 @@ class ApiController extends Controller
     {
         try
         {
-            $order = Order::with('orderlogs.farmeritem')->findorfail($id);
+            $order = Order::with('orderlogs.farmeritem.farmerunit')->findorfail($id);
             return response()->json(['status'=>true, 'data'=>$order]); 
         }catch (Exception $e) {
 
@@ -1207,7 +1207,7 @@ class ApiController extends Controller
         {   
 
             $user = user();
-            
+
             if($user->role != 'farmer')
             {
                 return response()->json(['status'=>false, 'message'=>'Invalid User'],400);
