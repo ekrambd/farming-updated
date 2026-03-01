@@ -207,14 +207,14 @@ class ApiController extends Controller
         {
             $validator = Validator::make($request->all(), [
                 'full_name' => 'required|string',
-                'farmercategory_id' => 'required|integer|exists:farmercategories,id',
+                'farmercategory_id' => 'nullable|integer|exists:farmercategories,id',
                 'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
                 'email' => 'nullable|email',
                 'phone' => 'nullable|string',
                 'password' => 'required|string',
                 'nid_passport' => 'required|numeric',
                 'confirm_password' => 'required|string|same:password',
-                'categories' => 'required|array|min:1'
+                'categories' => 'required'
             ]);
 
             if ($validator->fails()) {
