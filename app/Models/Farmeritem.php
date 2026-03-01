@@ -33,7 +33,7 @@ class Farmeritem extends Model
 
     public function orderlogs()
     {
-        return $this->hasMany(Orderlog::class, 'item_id');
+        return $this->belongsTo(Orderlog::class, 'item_id');
     }
 
     // public function farmercategory()
