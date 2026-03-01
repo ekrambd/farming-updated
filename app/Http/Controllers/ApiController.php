@@ -1014,7 +1014,7 @@ class ApiController extends Controller
     {
         try {
 
-            $query = Order::query();
+            //$query = Order::query();
 
             // if ($request->has('search') && !empty($request->search)) {
             //     $search = $request->search;
@@ -1028,30 +1028,54 @@ class ApiController extends Controller
             //     $q->where('status', 'Active');
             // }]);
 
+            // if($request->has('from_date'))
+            // {
+            //     $query->where('date','>=',$request->from_date);
+            // }
+
+            // if($request->has('to_date'))
+            // {
+            //     $query->where('date', '<=', $request->to_date);
+            // }
+
+            // if($request->has('status'))
+            // {
+            //     $query->where('status',$request->status);
+            // }
+
+            // if ($request->is_paginate == 1) {
+
+            //     $per_page = $request->per_page ?? 10;
+
+            //     $data = $query->latest()->paginate($per_page);
+
+            // } else {
+
+            //     $data = $query->latest()->get();
+            // }
+
+            $query = Orderlog::query();
+
             if($request->has('from_date'))
             {
-                $query->where('date','>=',$request->from_date);
+                $query->whereDate('created_at','>=',$request->from_date);
             }
 
             if($request->has('to_date'))
             {
-                $query->where('date', '<=', $request->to_date);
+                $query->whereDate('created_at', '<=', $request->to_date);
             }
 
-            if($request->has('status'))
-            {
-                $query->where('status',$request->status);
-            }
 
             if ($request->is_paginate == 1) {
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->latest()->paginate($per_page);
+                $data = $query->with('farmeritems')->latest()->paginate($per_page);
 
             } else {
 
-                $data = $query->latest()->get();
+                $data = $query->with('farmeritems')->latest()->get();
             }
 
             return response()->json([
@@ -1130,6 +1154,7 @@ class ApiController extends Controller
         {
             $order = Order::findorfail($request->order_id);
             $order->orderdetails()->delete();
+            $order->orderlogs()->delete();
             $order->delete();
             return response()->json(['status'=>true, 'message'=>'Successfully the order has been deleted']);
         }catch (Exception $e) {
