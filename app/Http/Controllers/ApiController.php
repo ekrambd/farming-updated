@@ -1156,9 +1156,13 @@ class ApiController extends Controller
         try
         {
             $notifications = Notification::where('user_id', user()->id)
-                            ->latest()
-                            ->distinct('order_id')
-                            ->get();
+                        ->select('order_id', DB::raw('MAX(id) as id'))
+                        ->groupBy('order_id')
+                        ->pluck('id');
+
+                    $data = Notification::whereIn('id', $notifications)
+                        ->latest()
+                        ->get();
             return response()->json(['status'=>count($notifications) > 0, 'data'=>$notifications]);
         }catch (Exception $e) {
 
