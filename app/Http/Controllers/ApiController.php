@@ -1076,11 +1076,11 @@ class ApiController extends Controller
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmeritems')->latest()->where('user_id',user()->id)->paginate($per_page);
+                $data = $query->with('farmeritem')->latest()->where('user_id',user()->id)->paginate($per_page);
 
             } else {
 
-                $data = $query->with('farmeritems')->latest()->where('user_id',user()->id)->get();
+                $data = $query->with('farmeritem')->latest()->where('user_id',user()->id)->get();
             }
 
             return response()->json([
