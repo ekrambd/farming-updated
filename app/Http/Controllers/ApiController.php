@@ -1225,12 +1225,12 @@ class ApiController extends Controller
                     ->join('orders', 'orders.id', '=', 'orderlogs.order_id')
                     ->where('orderlogs.user_id', user()->id)
                     ->select(
-                        DB::raw('SUM(orderlogs.unit_total) as totalOrders'),
-                        DB::raw("SUM(CASE WHEN orders.status = 'completed' THEN orders.order_total ELSE 0 END) as totalSold"),
-                        DB::raw("COUNT(CASE WHEN orders.status = 'deliverd' THEN 1 END) as totalDelivered"),
-                        DB::raw("COUNT(CASE WHEN orders.status = 'pending' THEN 1 END) as totalPending"),
-                        DB::raw("COUNT(CASE WHEN orders.date = CURDATE() THEN 1 END) as todayOrders"),
-                        DB::raw("COUNT(CASE WHEN orders.month = '".date('F')."' THEN 1 END) as thisMonthOrders")
+                        DB::raw('CAST(SUM(orderlogs.unit_total) AS CHAR) as totalOrders'),
+                        DB::raw("CAST(SUM(CASE WHEN orders.status = 'completed' THEN orders.order_total ELSE 0 END) AS CHAR) as totalSold"),
+                        DB::raw("CAST(COUNT(CASE WHEN orders.status = 'deliverd' THEN 1 END) AS CHAR) as totalDelivered"),
+                        DB::raw("CAST(COUNT(CASE WHEN orders.status = 'pending' THEN 1 END) AS CHAR) as totalPending"),
+                        DB::raw("CAST(COUNT(CASE WHEN orders.date = CURDATE() THEN 1 END) AS CHAR) as todayOrders"),
+                        DB::raw("CAST(COUNT(CASE WHEN orders.month = '".date('F')."' THEN 1 END) AS CHAR) as thisMonthOrders")
                     )
                     ->first();
 
