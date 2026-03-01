@@ -976,19 +976,14 @@ class ApiController extends Controller
 
             $items = json_decode($odata->items,true);
 
+            $user_id = '';
+
             foreach($items as $item)
             {
-                $notification = new Notification();
-                $notification->user_id = $item['user_id'];
-                $notification->order_id = $order->id;
-                $notification->title = "New Order Received";
-                $notification->sub_title = "Order ID is #$order->id. Please check the order's details";
-                $notification->status = 'unread';
-                $notification->timestamp = time();
-                $notification->save();
+                $user_id = $item['user_id'];
 
                 $log = new Orderlog();
-                $log->user_id = $item['user_id'];
+                $log->user_id = $user_id;
                 $log->order_id = $order->id;
                 $log->item_id = $item['id'];
                 $log->qty = $item['qty'];
@@ -998,7 +993,14 @@ class ApiController extends Controller
 
             }    
 
-            
+            $notification = new Notification();
+            $notification->user_id = $user_id;
+            $notification->order_id = $order->id;
+            $notification->title = "New Order Received";
+            $notification->sub_title = "Order ID is #$order->id. Please check the order's details";
+            $notification->status = 'unread';
+            $notification->timestamp = time();
+            $notification->save();
 
             DB::commit();
 
@@ -1155,14 +1157,7 @@ class ApiController extends Controller
     {
         try
         {
-            $notifications = Notification::where('user_id', user()->id)
-                        ->select('order_id', DB::raw('MAX(id) as id'))
-                        ->groupBy('order_id')
-                        ->pluck('id');
-
-                    $data = Notification::whereIn('id', $notifications)
-                        ->latest()
-                        ->get();
+            $notifications = Notification::where('user_id',user()->id)->latest()->get();
             return response()->json(['status'=>count($notifications) > 0, 'data'=>$notifications]);
         }catch (Exception $e) {
 
