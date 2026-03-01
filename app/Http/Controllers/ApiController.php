@@ -357,7 +357,7 @@ class ApiController extends Controller
 
             $user = User::where('email',$login)->orWhere('phone',$login)->first();
             
-            if(!$user)
+            if(!$user || $user->role != 'farmer')
             {
                 return response()->json(['status'=>false, 'message'=>'Email/Phone or Password Invalid', 'token'=>"", 'user'=>new \stdClass()],403);
             }
