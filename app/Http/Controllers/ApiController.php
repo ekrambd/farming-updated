@@ -984,7 +984,7 @@ class ApiController extends Controller
                 $notification->title = "New Order Received";
                 $notification->sub_title = "Order ID is #$order->id. Please check the order's details";
                 $notification->status = 'unread';
-                $notification->time = time();
+                $notification->timestamp = time();
                 $notification->save();
 
                 $log = new Orderlog();
