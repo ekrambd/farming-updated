@@ -225,6 +225,9 @@ class ApiController extends Controller
                 ], 422);  
             }
 
+            var_dump($request->categories);
+            exit();
+
             $emailCheck = User::where('email', $request->email)->first();
             $phoneCheck = User::where('phone', $request->phone)->first();
 
