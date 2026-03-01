@@ -542,11 +542,11 @@ class ApiController extends Controller
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmercategory','farmersubcategory','farmerunit')->latest()->paginate($per_page);
+                $data = $query->with('farmercategory','farmersubcategory','farmerunit','images')->latest()->paginate($per_page);
 
             } else {
 
-                $data = $query->with('farmercategories','farmersubcategories','farmerunit')->latest()->get();
+                $data = $query->with('farmercategories','farmersubcategories','farmerunit','images')->latest()->get();
             }
 
             return response()->json([
@@ -1190,6 +1190,49 @@ class ApiController extends Controller
             $noty->save();
 
             return response()->json(['status'=>true, 'message'=>'Successfully updated']);
+
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function farmerDashboard(Request $request)
+    {
+        try
+        {   
+            if($user->role != 'farmer')
+            {
+                return response()->json(['status'=>false, 'message'=>'Invalid User'],400);
+            }
+
+            // $totalOrders = Orderlog::where('user_id',user()->id)->sum('unit_total');
+            // $ids = Orderlog::where('user_id',user()->id)->pluck('order_id')->toArray();
+            // $totalSold = Order::whereIn('id',$ids)->where('status','completed')->sum('order_total');
+            // $totalDelivered = Order::whereIn('id',$ids)->where('status','deliverd')->count();
+            // $totalPending = Order::whereIn('id',$ids)->where('status','pending')->count();
+            // $todayOrders = Order::whereIn('id',$ids)->where('date',date('Y-m-d'))->count();
+            // $thisMonthOrders = Order::whereIn('id',$ids)->where('month',date('F'))->count();
+
+            $data = DB::table('orderlogs')
+                    ->join('orders', 'orders.id', '=', 'orderlogs.order_id')
+                    ->where('orderlogs.user_id', user()->id)
+                    ->select(
+                        DB::raw('SUM(orderlogs.unit_total) as totalOrders'),
+                        DB::raw("SUM(CASE WHEN orders.status = 'completed' THEN orders.order_total ELSE 0 END) as totalSold"),
+                        DB::raw("COUNT(CASE WHEN orders.status = 'deliverd' THEN 1 END) as totalDelivered"),
+                        DB::raw("COUNT(CASE WHEN orders.status = 'pending' THEN 1 END) as totalPending"),
+                        DB::raw("COUNT(CASE WHEN orders.date = CURDATE() THEN 1 END) as todayOrders"),
+                        DB::raw("COUNT(CASE WHEN orders.month = '".date('F')."' THEN 1 END) as thisMonthOrders")
+                    )
+                    ->first();
+
+           return response()->json(['status'=>true, 'data'=>$data]);
+
 
         }catch (Exception $e) {
 
