@@ -1054,6 +1054,11 @@ class ApiController extends Controller
             //     $data = $query->latest()->get();
             // }
 
+            if(user()->role != 'farmer')
+            {
+                return response()->json(['status'=>false, 'message'=>'Invalid User', 'data'=>array()],400);
+            }
+
             $query = Orderlog::query();
 
             if($request->has('from_date'))
@@ -1071,15 +1076,16 @@ class ApiController extends Controller
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmeritems')->latest()->paginate($per_page);
+                $data = $query->with('farmeritems')->latest()->where('user_id',user()->id)->paginate($per_page);
 
             } else {
 
-                $data = $query->with('farmeritems')->latest()->get();
+                $data = $query->with('farmeritems')->latest()->where('user_id',user()->id)->get();
             }
 
             return response()->json([
                 'status' => true,
+                'message' => 'Data found',
                 'data'   => $data
             ]);
 
