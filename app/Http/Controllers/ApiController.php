@@ -1205,6 +1205,9 @@ class ApiController extends Controller
     {
         try
         {   
+
+            $user = user();
+            
             if($user->role != 'farmer')
             {
                 return response()->json(['status'=>false, 'message'=>'Invalid User'],400);
