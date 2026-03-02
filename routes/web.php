@@ -9,6 +9,8 @@ use App\Http\Controllers\FarmercategoryController;
 use App\Http\Controllers\FarmersubcategoryController;
 use App\Http\Controllers\FarmerunitController;
 use App\Http\Controllers\FarmeritemController;
+use App\Http\Controllers\DataController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -44,6 +46,10 @@ Route::group(['middleware' => 'prevent-back-history'],function(){
 
    //farmer units
     Route::resource('farmerunits', FarmerunitController::class);
+
+   //farmer lists
+
+    Route::get('/farmer-lists', [DataController::class, 'farmerLists']);
 
 
 });

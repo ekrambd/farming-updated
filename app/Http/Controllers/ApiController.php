@@ -565,11 +565,11 @@ class ApiController extends Controller
         }
     }
 
-    public function itemDetails($id)
+    public function itemDetails($id) 
     {
         try
         {
-            $data = Farmeritem::with('farmercategories','farmersubcategories','farmerunit','images')->findorfail($id);
+            $data = Farmeritem::with('farmercategories','farmersubcategories','farmerunit','images','user.userinfo')->findorfail($id);
             return response()->json(['status'=>true, 'data'=>$data]);
         }catch (Exception $e) {
 
