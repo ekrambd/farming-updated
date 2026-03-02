@@ -518,15 +518,15 @@ class ApiController extends Controller
                 $query->where('status',$request->status);
             }
 
-            if($request->has('category_id'))
-            {
-                $query->where('farmercategory_id',$request->category_id);
-            }
+            // if($request->has('category_id'))
+            // {
+            //     $query->where('farmercategory_id',$request->category_id);
+            // }
 
-            if($request->has('subcategory_id'))
-            {
-                $query->where('farmersubcategory_id',$request->subcategory_id);
-            }
+            // if($request->has('subcategory_id'))
+            // {
+            //     $query->where('farmersubcategory_id',$request->subcategory_id);
+            // }
 
             if(user()->role == 'farmer')
             {
@@ -538,14 +538,19 @@ class ApiController extends Controller
                 $query->where('status','Active');
             }
 
-            if($request->has('best_deal'))
+            if($request->has('best_deal') && $request->best_deal == 1)
             {
                 $query->whereNotNull('discount');
             }
 
-            if($request->has('popular_product'))
+            if($request->has('popular_product') && $request->popular_product == 1)
             {
                 $query->orderBy('hit_count', 'desc');
+            }
+
+            if($request->has('farmer_id'))
+            {
+                $query->where('user_id',$request->farmer_id);
             }
 
 
