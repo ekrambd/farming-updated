@@ -538,12 +538,22 @@ class ApiController extends Controller
                 $query->where('status','Active');
             }
 
+            if($request->has('best_deal'))
+            {
+                $query->whereNotNull('discount');
+            }
+
+            if($request->has('popular_product'))
+            {
+                $query->orderBy('hit_count', 'desc');
+            }
+
 
             if ($request->is_paginate == 1) {
 
                 $per_page = $request->per_page ?? 10;
 
-                $data = $query->with('farmercategory','farmersubcategory','farmerunit','images')->latest()->paginate($per_page);
+                $data = $query->with('farmercategories','farmersubcategories','farmerunit','images')->latest()->paginate($per_page);
 
             } else {
 
