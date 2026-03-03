@@ -1335,7 +1335,8 @@ class ApiController extends Controller
     public function userDetails()
     {
         try
-        {
+        {   
+            return user();
             $user = User::with('userinfo')->findorfail(user()->id);
             return response()->json(['status'=>true, 'data'=>$user]);
         }catch (Exception $e) {
