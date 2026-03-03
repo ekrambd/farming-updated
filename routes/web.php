@@ -10,6 +10,7 @@ use App\Http\Controllers\FarmersubcategoryController;
 use App\Http\Controllers\FarmerunitController;
 use App\Http\Controllers\FarmeritemController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,13 @@ Route::group(['middleware' => 'prevent-back-history'],function(){
    //farmer lists
 
     Route::get('/farmer-lists', [DataController::class, 'farmerLists']);
+
+    Route::get('/farmer-details/{id}', [DataController::class, 'farmerDetails']);
+
+    //settings
+    Route::get('/change-password', [SettingController::class, 'changePassword']);
+
+    Route::post('password-change', [SettingController::class, 'passwordChange']);
 
 
 });

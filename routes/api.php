@@ -28,6 +28,8 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
 	Route::post('farmer-signup', [ApiController::class, 'farmerSignup']);
 	Route::post('farmer-signin', [ApiController::class, 'farmerSignin']);
+
+	Route::get('/user-details', [ApiController::class, 'userDetails']);
 	
 	
 
