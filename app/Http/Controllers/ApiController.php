@@ -1336,7 +1336,10 @@ class ApiController extends Controller
     {
         try
         {   
-            return user();
+            if(user()->role != 'user')
+            {
+                return response()->json(['status'=>false, 'data'=>new \stdClass()],400);
+            }
             $user = User::with('userinfo')->findorfail(user()->id);
             return response()->json(['status'=>true, 'data'=>$user]);
         }catch (Exception $e) {

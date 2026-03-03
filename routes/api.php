@@ -28,12 +28,13 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
 	Route::post('farmer-signup', [ApiController::class, 'farmerSignup']);
 	Route::post('farmer-signin', [ApiController::class, 'farmerSignin']);
-
-	Route::get('/user-details', [ApiController::class, 'userDetails']);
 	
 	
 
 	Route::middleware('auth:sanctum')->group( function (){
+
+		Route::get('/user-details', [ApiController::class, 'userDetails']);
+		
 		Route::post('user-signout', [ApiController::class, 'userSignOut']);
 		Route::post('farmer-signout', [ApiController::class, 'farmerSignOut']);
 		
