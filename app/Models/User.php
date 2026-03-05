@@ -57,5 +57,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Farmeritem::class);
     }
+
+    public function farmerratings()
+    {
+        return $this->hasMany(Farmerrating::class);
+    }
     
 }

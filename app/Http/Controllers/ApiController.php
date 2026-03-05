@@ -93,6 +93,11 @@ class ApiController extends Controller
 
             $user = new User();
 
+            if(!$user || $user->role != 'user')
+            {
+                return response()->json(['status'=>false, 'message'=>"Invalid User", "data"=>new \stdClass()],400);
+            }    
+
             if($request->has('email')){
                 $countEmail = User::where('email',$request->email)->count();
                 if($countEmail > 0){

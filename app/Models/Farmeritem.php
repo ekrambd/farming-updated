@@ -73,4 +73,9 @@ class Farmeritem extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function productratings()
+    {
+        return $this->hasMany(Productrating::class);
+    }
+
 }
