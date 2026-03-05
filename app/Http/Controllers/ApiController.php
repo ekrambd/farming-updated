@@ -1418,7 +1418,7 @@ class ApiController extends Controller
                 ], 422);  
             }
 
-            $item = Farmeritem::with('productratings')->findorfail($id);
+            $item = Farmeritem::with('productratings')->findorfail($request->farmeritem_id);
 
             return response()->json(['status'=>true, 'data'=>$item]);
         }catch (Exception $e) {
