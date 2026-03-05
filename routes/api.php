@@ -75,7 +75,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		//rating
 		Route::post('save-item-rate', [ApiController::class, 'saveItemRate']);
 		Route::post('save-product-rate', [ApiController::class, 'saveItemRate']);
-		Route::get('/item-rate-lists', [ApiController::class, 'itemRateLists']);
+		Route::post('/item-rate-lists', [ApiController::class, 'itemRateLists']);
 		Route::get('/product-rate-lists', [ApiController::class, 'productRateLists']);
 
 
