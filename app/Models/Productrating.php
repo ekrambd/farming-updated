@@ -11,6 +11,6 @@ class Productrating extends Model
 
     public function farmeritem()
     {
-    	return $this->belongsTo(Farmeritem::class)
+    	return $this->belongsTo(Farmeritem::class);
     }
 }

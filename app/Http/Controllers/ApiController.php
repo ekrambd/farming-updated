@@ -20,6 +20,8 @@ use App\Models\Order;
 use App\Models\Orderdetail;
 use App\Models\Notification;
 use App\Models\Orderlog;
+use App\Models\Productrating;
+use App\Models\Farmerrating;
 
 class ApiController extends Controller
 {
@@ -1348,6 +1350,146 @@ class ApiController extends Controller
             $user = User::with('userinfo')->findorfail(user()->id);
             return response()->json(['status'=>true, 'data'=>$user]);
         }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function saveItemRate(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                //'user_id' => 'required|integer|exists:users,id',
+                'farmeritem_id' => 'required|integer|exists:farmeritems,id',
+                'rating' => 'required|integer',
+                'remarks' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            if(user()->role != 'user')
+            {
+                return response()->json(['status'=>false, 'message'=>'Invalid Request', 'data'=>new \stdClass()],400);
+            }
+
+            $rate = new Productrating();
+            $rate->user_id = user()->id;
+            $rate->rating = $request->rating;
+            $rate->remarks = $request->remarks;
+            $rate->save();
+
+            return response()->json(['status'=>true, 'message'=>'Successfully your review has been taken', 'data'=>$rate]);
+
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function itemRateLists(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'farmeritem_id' => 'required|integer|exists:farmeritems,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $item = Farmeritem::with('productratings')->findorfail($id);
+
+            return response()->json(['status'=>true, 'data'=>$item]);
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function searchItems(Request $request)
+    {
+        try {
+
+            $query = Farmeritem::query();
+
+            // item name search
+            if ($request->filled('item_name')) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('item_name', 'LIKE', '%'.$request->item_name.'%')
+                      ->orWhere('item_name_bn', 'LIKE', '%'.$request->item_name.'%');
+                });
+            }
+
+            // stock search
+            if ($request->filled('stock_qty')) {
+                $query->where('stock_qty', '>=', $request->stock_qty);
+            }
+
+            // category search (many to many)
+            if ($request->filled('farmercategory_id')) {
+                $query->whereHas('farmercategories', function ($q) use ($request) {
+                    $q->where('farmercategories.id', $request->farmercategory_id);
+                });
+            }
+
+            // subcategory search (many to many)
+            if ($request->filled('farmersubcategory_id')) {
+                $query->whereHas('farmersubcategories', function ($q) use ($request) {
+                    $q->where('farmersubcategories.id', $request->farmersubcategory_id);
+                });
+            }
+
+            // relation load
+            $query->with([
+                'farmercategories',
+                'farmersubcategories',
+                'farmerunit',
+                'images'
+            ])->latest();
+
+            // paginate option
+            if ($request->is_paginate == 1) {
+
+                $per_page = $request->per_page ?? 10;
+
+                $data = $query->paginate($per_page);
+
+            } else {
+
+                $data = $query->get();
+            }
+
+            return response()->json([
+                'status' => true,
+                'data'   => $data
+            ]);
+
+        } catch (Exception $e) {
 
             return response()->json([
                 'status'  => false,

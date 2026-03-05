@@ -28,6 +28,8 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
 	Route::post('farmer-signup', [ApiController::class, 'farmerSignup']);
 	Route::post('farmer-signin', [ApiController::class, 'farmerSignin']);
+
+	Route::post('search-item', [ApiController::class, 'searchItems']);
 	
 	
 
@@ -69,5 +71,13 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		Route::get('/notification-lists', [ApiController::class, 'notificationLists']);
 		Route::post('notification-status-read', [ApiController::class, 'notificationStatusRead']);
 		Route::post('farmer-dashboard', [ApiController::class, 'farmerDashboard']);
+
+		//rating
+		Route::post('save-item-rate', [ApiController::class, 'saveItemRate']);
+		Route::post('save-product-rate', [ApiController::class, 'saveItemRate']);
+		Route::get('/item-rate-lists', [ApiController::class, 'itemRateLists']);
+		Route::get('/product-rate-lists', [ApiController::class, 'productRateLists']);
+
+
 	});
 });
