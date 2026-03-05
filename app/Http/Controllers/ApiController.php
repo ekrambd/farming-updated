@@ -1385,6 +1385,7 @@ class ApiController extends Controller
 
             $rate = new Productrating();
             $rate->user_id = user()->id;
+            $rate->farmeritem_id = $request->farmeritem_id;
             $rate->rating = $request->rating;
             $rate->remarks = $request->remarks;
             $rate->save();
