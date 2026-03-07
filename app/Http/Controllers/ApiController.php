@@ -1677,7 +1677,7 @@ class ApiController extends Controller
 
                     return response()->json([
                         'status' => $users->count() > 0,
-                        'message' => 'Data Found',
+                        'message' => $users->count() > 0?"Data Found":"No data found",
                         'total' => $users->count(),
                         'data' => $users
                     ]);
