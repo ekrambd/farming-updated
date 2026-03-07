@@ -1506,65 +1506,184 @@ class ApiController extends Controller
         }
     }
 
+    // public function searchFarmer(Request $request)
+    // {
+    //     try
+    //     {   
+
+    //         $validator = Validator::make($request->all(), [
+    //             //'user_id' => 'required|integer|exists:users,id',
+    //             'lat_one' => 'required|numeric',
+    //             'lon_one' => 'required|numeric',
+    //             'lat_two' => 'nullable|numeric',
+    //             'lon_two' => 'nullable|numeric',
+    //             'radius'  => 'nullable|numeric',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'status' => false, 
+    //                 'message' => 'Please fill all requirement fields', 
+    //                 'data' => $validator->errors()
+    //             ], 422);  
+    //         }
+
+
+    //         if($request->filled('lat_one') && $request->filled('lon_one'))
+    //         {
+    //             if(empty($request->radius))
+    //             {
+    //                 return response()->json(['status'=>false, 'message'=>'Radius field is required', 'total'=>0, 'data'=>array()],422);
+    //             }
+
+    //             $lat1 = $request->lat_one;
+    //             $lon1 = $request->lon_one;
+    //             $radius = $request->radius;
+
+    //             // Haversine formula
+    //             $ids = Userinfo::select('*')
+    //                 ->selectRaw("
+    //                     ( 6371 * acos( 
+    //                         cos( radians(?) ) 
+    //                         * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+    //                         * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+    //                         + sin( radians(?) ) 
+    //                         * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+    //                     ) ) AS distance
+    //                 ", [$lat1, $lon1, $lat1])
+    //                 ->havingRaw('distance <= ?', [$radius])
+    //                 ->orderBy('distance', 'asc')
+    //                 ->pluck('user_id')
+    //                 ->toArray();
+
+    //             $users = User::with('userinfo')->whereIn('id',$ids)->where('status','Active')->get();
+
+    //             return response()->json(['status'=>count($users) > 0, 'message'=>'Data Found', 'total'=>count($users), 'data'=>$users]);
+
+    //         }
+
+            
+    //     }catch (Exception $e) {
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'code'    => $e->getCode(),
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+
     public function searchFarmer(Request $request)
     {
         try
         {   
-
             $validator = Validator::make($request->all(), [
-                //'user_id' => 'required|integer|exists:users,id',
                 'lat_one' => 'required|numeric',
                 'lon_one' => 'required|numeric',
                 'lat_two' => 'nullable|numeric',
                 'lon_two' => 'nullable|numeric',
-                'radius'  => 'nullable|numeric',
+                'radius'  => 'required|numeric',
+                'category_id' => 'nullable|integer|exists:farmercategories,id',
+                'is_paginate' => 'required|in:0,1',
+                'per_page' => 'nullable|integer',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false, 
-                    'message' => 'Please fill all requirement fields', 
+                    'message' => 'Please fill all required fields', 
                     'data' => $validator->errors()
                 ], 422);  
             }
 
-
-            if($request->filled('lat_one') && $request->filled('lon_one'))
+            if($request->filled('lat_one') && $request->filled('lon_one') && $request->filled('lat_two') && $request->filled('lon_two'))
             {
-                if(empty($request->radius))
-                {
-                    return response()->json(['status'=>false, 'message'=>'Radius field is required', 'total'=>0, 'data'=>array()],422);
+                $latMin = min($request->lat_one, $request->lat_two);
+                $latMax = max($request->lat_one, $request->lat_two);
+                $lonMin = min($request->lon_one, $request->lon_two);
+                $lonMax = max($request->lon_one, $request->lon_two);
+
+                // Base query: bounding box filter
+                $query = User::with('userinfo')->whereHas('userinfo', function($q) use ($latMin, $latMax, $lonMin, $lonMax){
+                    $q->whereRaw("CAST(SUBSTRING_INDEX(businees_location, ',', 1) AS DECIMAL(10,7)) BETWEEN ? AND ?", [$latMin, $latMax])
+                      ->whereRaw("CAST(SUBSTRING_INDEX(businees_location, ',', -1) AS DECIMAL(10,7)) BETWEEN ? AND ?", [$lonMin, $lonMax]);
+                })->where('status','Active');
+
+                // Category filter
+                if ($request->filled('category_id')) {
+                    $query->whereHas('farmercategories', function($q) use ($request) {
+                        $q->where('farmercategory_id', $request->category_id);
+                    });
                 }
 
-                $lat1 = $request->lat_one;
-                $lon1 = $request->lon_one;
-                $radius = $request->radius;
+                // Pagination
+                if ($request->is_paginate == 1) {
+                    $perPage = $request->per_page ?? 10;
+                    $users = $query->paginate($perPage);
+                } else {
+                    $users = $query->get();
+                }
 
-                // Haversine formula
-                $ids = Userinfo::select('*')
-                    ->selectRaw("
-                        ( 6371 * acos( 
-                            cos( radians(?) ) 
-                            * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
-                            * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
-                            + sin( radians(?) ) 
-                            * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
-                        ) ) AS distance
-                    ", [$lat1, $lon1, $lat1])
-                    ->havingRaw('distance <= ?', [$radius])
-                    ->orderBy('distance', 'asc')
-                    ->pluck('user_id')
-                    ->toArray();
+                return response()->json([
+                    'status' => $users->count() > 0,
+                    'message' => 'Data Found',
+                    'total' => $users->count(),
+                    'data' => $users
+                ]);
+            }elseif($request->filled('lat_one') && $request->filled('lon_one')){
+                    $lat1 = $request->lat_one;
+                    $lon1 = $request->lon_one;
+                    $radius = $request->radius;
 
-                $users = User::with('userinfo')->whereIn('id',$ids)->where('status','Active')->get();
+                    if(empty($request->radius))
+                    {
+                        return response()->json(['status'=>false, 'message'=>'Radius field is required', 'total'=>0, 'data'=>array()],422);
+                    }
 
-                return response()->json(['status'=>count($users) > 0, 'message'=>'Data Found', 'total'=>count($users), 'data'=>$users]);
+                    // Haversine formula
+                    $ids = Userinfo::select('*')
+                        ->selectRaw("
+                            ( 6371 * acos( 
+                                cos( radians(?) ) 
+                                * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                                * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+                                + sin( radians(?) ) 
+                                * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                            ) ) AS distance
+                        ", [$lat1, $lon1, $lat1])
+                        ->havingRaw('distance <= ?', [$radius])
+                        ->orderBy('distance', 'asc')
+                        ->pluck('user_id')
+                        ->toArray();
 
+                    // Base query
+                    $query = User::with('userinfo')->whereIn('id', $ids)->where('status','Active');
+
+                    // Category filter
+                    if ($request->filled('category_id')) {
+                        $query->whereHas('farmercategories', function($q) use ($request) {
+                            $q->where('farmercategory_id', $request->category_id);
+                        });
+                    }
+
+                    // Pagination
+                    if ($request->is_paginate == 1) {
+                        $perPage = $request->per_page ?? 10;
+                        $users = $query->paginate($perPage);
+                    } else {
+                        $users = $query->get();
+                    }
+
+                    return response()->json([
+                        'status' => $users->count() > 0,
+                        'message' => 'Data Found',
+                        'total' => $users->count(),
+                        'data' => $users
+                    ]);
             }
 
-            
-        }catch (Exception $e) {
-
+        } catch (Exception $e) {
             return response()->json([
                 'status'  => false,
                 'code'    => $e->getCode(),
