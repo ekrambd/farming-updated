@@ -1533,7 +1533,7 @@ class ApiController extends Controller
             {
                 if(empty($request->radius))
                 {
-                    return response()->json(['status'=>false, 'message'=>'Radius field is required'],422);
+                    return response()->json(['status'=>false, 'message'=>'Radius field is required', 'total'=>0, 'data'=>array()],422);
                 }
 
                 $lat1 = $request->lat_one;
@@ -1558,7 +1558,7 @@ class ApiController extends Controller
 
                 $users = User::whereIn('id',$ids)->where('status','Active')->get();
 
-                return response()->json(['status'=>count($users) > 0, 'data'=>$users]);
+                return response()->json(['status'=>count($users) > 0, 'message'=>'Data Found', 'total'=>count($users), 'data'=>$users]);
 
             }
 
