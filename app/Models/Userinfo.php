@@ -26,7 +26,7 @@ class Userinfo extends Model
         return $this->belongsTo(Farmersubcategory::class, 'farmersubcategory_id');
     }
 
-    public function locations()
+    public function getLocationsAttribute() 
     {
         $data = getLocation($this->id);
         return $data;
