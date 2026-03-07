@@ -1506,4 +1506,52 @@ class ApiController extends Controller
         }
     }
 
+    public function searchFarmer(Request $request)
+    {
+        try
+        {   
+
+            $validator = Validator::make($request->all(), [
+                //'user_id' => 'required|integer|exists:users,id',
+                'lat_one' => 'required|numeric',
+                'lon_one' => 'required|numeric',
+                'lat_two' => 'nullable|numeric',
+                'lon_two' => 'nullable|numeric',
+                'radius'  => 'nullable|numeric',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+
+            if($request->filled('lat_one') && $request->filled('lon_one'))
+            {
+                if(empty($request->radius))
+                {
+                    return response()->json(['status'=>false, 'message'=>'Radius field is required'],422);
+                }
+
+                $radius = $request->radius;
+
+                $locations = Userinfo::whereIn('business_address')->pluck('businees_location')->toArray();
+
+                return $locations;
+            }
+
+            
+        }catch (Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

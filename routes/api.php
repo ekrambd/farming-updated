@@ -31,7 +31,7 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
 	Route::post('search-item', [ApiController::class, 'searchItems']);
 	
-	
+	Route::post('/search-farmer', [ApiController::class, 'searchFarmer']);
 
 	Route::middleware('auth:sanctum')->group( function (){
 
@@ -77,6 +77,8 @@ Route::middleware(['throttle:60,1'])->group(function () {
 		Route::post('save-product-rate', [ApiController::class, 'saveItemRate']);
 		Route::post('/item-rate-lists', [ApiController::class, 'itemRateLists']);
 		Route::get('/product-rate-lists', [ApiController::class, 'productRateLists']);
+
+		
 
 
 	});
