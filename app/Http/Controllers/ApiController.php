@@ -1536,11 +1536,30 @@ class ApiController extends Controller
                     return response()->json(['status'=>false, 'message'=>'Radius field is required'],422);
                 }
 
+                $lat1 = $request->lat_one;
+                $lon1 = $request->lon_one;
                 $radius = $request->radius;
 
-                $locations = Userinfo::get();
+                // Haversine formula
+                $ids = Userinfo::select('*')
+                    ->selectRaw("
+                        ( 6371 * acos( 
+                            cos( radians(?) ) 
+                            * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                            * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+                            + sin( radians(?) ) 
+                            * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                        ) ) AS distance
+                    ", [$lat1, $lon1, $lat1])
+                    ->havingRaw('distance <= ?', [$radius])
+                    ->orderBy('distance', 'asc')
+                    ->pluck('user_id')
+                    ->toArray();
 
-                return $locations;
+                $users = User::whereIn('id',$ids)->where('status','Active')->get();
+
+                return response()->json(['status'=>count($users) > 0, 'data'=>$users]);
+
             }
 
             
@@ -1553,5 +1572,57 @@ class ApiController extends Controller
             ], 500);
         }
     } 
+     
 
+    // public function searchFarmer(Request $request)
+    // {
+    //     try {   
+    //         $validator = Validator::make($request->all(), [
+    //             'lat_one' => 'required|numeric',
+    //             'lon_one' => 'required|numeric',
+    //             'radius'  => 'required|numeric', // radius km e
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return response()->json([
+    //                 'status' => false, 
+    //                 'message' => 'Please fill all requirement fields', 
+    //                 'data' => $validator->errors()
+    //             ], 422);  
+    //         }
+
+    //         $lat1 = $request->lat_one;
+    //         $lon1 = $request->lon_one;
+    //         $radius = $request->radius;
+
+    //         // Haversine formula
+    //         $locations = Userinfo::select('*')
+    //             ->selectRaw("
+    //                 ( 6371 * acos( 
+    //                     cos( radians(?) ) 
+    //                     * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+    //                     * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+    //                     + sin( radians(?) ) 
+    //                     * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+    //                 ) ) AS distance
+    //             ", [$lat1, $lon1, $lat1])
+    //             ->havingRaw('distance <= ?', [$radius])
+    //             ->orderBy('distance', 'asc')
+    //             ->get();
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'message' => 'Farmers found within radius',
+    //             'data' => $locations
+    //         ]);
+
+    //     } catch (Exception $e) {
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'code'    => $e->getCode(),
+    //             'message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 }
