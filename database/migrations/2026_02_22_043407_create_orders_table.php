@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('timestamp')->nullable();
             $table->string('payment_method')->nullable();
             $table->string('status')->default('pending')->nullable();
+            $table->string('order_type')->nullable();
             $table->string('trx_id')->nullable();
             $table->string('order_total')->nullable();
             $table->timestamps();

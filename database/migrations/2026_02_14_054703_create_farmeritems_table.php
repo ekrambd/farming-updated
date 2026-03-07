@@ -27,6 +27,7 @@ return new class extends Migration
             $table->integer('hit_conunt')->default('0');
             $table->text('description');
             $table->string('featured_image');
+            $table->string('delivery_charge');
             $table->enum('status', ['Active', 'Inactive']);
             $table->timestamps();
         });

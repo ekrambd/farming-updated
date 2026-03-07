@@ -434,6 +434,7 @@ class ApiController extends Controller
                 'status' => 'required|in:Active,Inactive',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+                'delivery_charge' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
@@ -464,6 +465,7 @@ class ApiController extends Controller
                 'description' => $request->description,
                 'hit_count' => 0,
                 'featured_image' => $featuredImage,
+                'delivery_charge' => $request->delivery_charge,
                 'status' => $request->status, 
             ]);
 
@@ -627,6 +629,7 @@ class ApiController extends Controller
                 'status' => 'required|in:Active,Inactive',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+                'delivery_charge' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
@@ -672,6 +675,7 @@ class ApiController extends Controller
                 'discount' => $request->discount,
                 'stock_qty' => $request->stock_qty,
                 'description' => $request->description,
+                'delivery_charge' => $request->delivery_charge,
                 'status' => $request->status,
             ]);
 
@@ -968,6 +972,7 @@ class ApiController extends Controller
                 'data' => 'required|array|min:1',
                 'payment_method' => 'required|in:cod,bkash,rocket,nagad',
                 'order_total' => 'required|numeric',
+                'order_type' => 'required|in:custom_collection,home_delivery',
             ]);
 
             if ($validator->fails()) {
@@ -990,6 +995,7 @@ class ApiController extends Controller
             $order->status = 'pending';
             $order->order_total = $request->order_total;
             $order->payment_method = $request->payment_method;
+            $order->order_type = $request->order_type;
             $order->save();
 
             $odata = new Orderdetail();

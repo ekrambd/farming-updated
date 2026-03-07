@@ -24,6 +24,7 @@ class Farmeritem extends Model
         'description',
         'featured_image',
         'hit_count',
+        'delivery_charge',
         'status',
     ];
 
