@@ -1583,7 +1583,7 @@ class ApiController extends Controller
                 'lon_one' => 'required|numeric',
                 'lat_two' => 'nullable|numeric',
                 'lon_two' => 'nullable|numeric',
-                'radius'  => 'required|numeric',
+                'radius'  => 'nullable|numeric',
                 'category_id' => 'nullable|integer|exists:farmercategories,id',
                 'is_paginate' => 'required|in:0,1',
                 'per_page' => 'nullable|integer',
