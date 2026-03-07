@@ -1538,7 +1538,7 @@ class ApiController extends Controller
 
                 $radius = $request->radius;
 
-                $locations = Userinfo::pluck('businees_location')->toArray();
+                $locations = Userinfo::get();
 
                 return $locations;
             }

@@ -3,6 +3,7 @@
  use App\Models\Farmersubcategory;
  use App\Models\Farmeritem;
  use App\Models\Charge;
+ use App\Models\Userinfo;
 
  function user()
  {
@@ -51,4 +52,11 @@ function charge()
 {
 	$data = Charge::find(1);
 	return $data;
+}
+
+function getLocation($id)
+{
+	$data = Userinfo::find($id);
+	$locations = explode(",",$data->businees_location);
+	return $locations;
 }
