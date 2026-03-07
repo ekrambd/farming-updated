@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Userinfo extends Model
 {
     use HasFactory;
+
+    protected $appends = ['locations'];
     
     public function user()
     {
