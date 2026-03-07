@@ -1552,6 +1552,6 @@ class ApiController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-    }
+    } 
 
 }
