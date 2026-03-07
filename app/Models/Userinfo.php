@@ -9,7 +9,7 @@ class Userinfo extends Model
 {
     use HasFactory;
 
-    protected $appends = ['locations'];
+    //protected $appends = ['locations'];
     
     public function user()
     {
