@@ -1556,7 +1556,7 @@ class ApiController extends Controller
                     ->pluck('user_id')
                     ->toArray();
 
-                $users = User::whereIn('id',$ids)->where('status','Active')->get();
+                $users = User::with('userinfo')->whereIn('id',$ids)->where('status','Active')->get();
 
                 return response()->json(['status'=>count($users) > 0, 'message'=>'Data Found', 'total'=>count($users), 'data'=>$users]);
 
