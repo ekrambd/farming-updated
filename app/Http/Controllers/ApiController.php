@@ -1642,20 +1642,35 @@ class ApiController extends Controller
                     }
 
                     // Haversine formula
+                    // $ids = Userinfo::select('*')
+                    //     ->selectRaw("
+                    //         ( 6371 * acos( 
+                    //             cos( radians(?) ) 
+                    //             * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                    //             * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+                    //             + sin( radians(?) ) 
+                    //             * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                    //         ) ) AS distance
+                    //     ", [$lat1, $lon1, $lat1])
+                    //     ->havingRaw('distance <= ?', [$radius])
+                    //     ->orderBy('distance', 'asc')
+                    //     ->pluck('user_id')
+                    //     ->toArray();
+
                     $ids = Userinfo::select('*')
-                        ->selectRaw("
-                            ( 6371 * acos( 
-                                cos( radians(?) ) 
-                                * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
-                                * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
-                                + sin( radians(?) ) 
-                                * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
-                            ) ) AS distance
-                        ", [$lat1, $lon1, $lat1])
-                        ->havingRaw('distance <= ?', [$radius])
-                        ->orderBy('distance', 'asc')
-                        ->pluck('user_id')
-                        ->toArray();
+                            ->selectRaw("
+                                ( 6371000 * acos( 
+                                    cos( radians(?) ) 
+                                    * cos( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                                    * cos( radians( SUBSTRING_INDEX(businees_location, ',', -1) ) - radians(?) ) 
+                                    + sin( radians(?) ) 
+                                    * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
+                                ) ) AS distance
+                            ", [$lat1, $lon1, $lat1])
+                            ->havingRaw('distance <= ?', [$radius])
+                            ->orderBy('distance', 'asc')
+                            ->pluck('user_id')
+                            ->toArray();
 
                     // Base query
                     $query = User::with('userinfo')->whereIn('id', $ids)->where('status','Active');
