@@ -1652,7 +1652,7 @@ class ApiController extends Controller
                                 * sin( radians( SUBSTRING_INDEX(businees_location, ',', 1) ) ) 
                             ) ) AS distance
                         ", [$lat1, $lon1, $lat1])
-                        ->havingRaw('distance', '<=', [$radius])
+                        ->havingRaw('distance <= ?', [$radius])
                         ->orderBy('distance', 'asc')
                         ->pluck('user_id')
                         ->toArray();
