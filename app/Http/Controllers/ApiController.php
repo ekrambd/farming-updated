@@ -1597,7 +1597,7 @@ class ApiController extends Controller
                 ], 422);  
             }
 
-            if($request->filled('lat_one') && $request->filled('lon_one') && $request->filled('lat_two') && $request->filled('lon_two'))
+            if($request->has('lat_one') && $request->has('lon_one') && $request->has('lat_two') && $request->has('lon_two'))
             {
                 $latMin = min($request->lat_one, $request->lat_two);
                 $latMax = max($request->lat_one, $request->lat_two);
@@ -1611,7 +1611,7 @@ class ApiController extends Controller
                 })->where('status','Active');
 
                 // Category filter
-                if ($request->filled('category_id')) {
+                if ($request->has('category_id')) {
                     $query->whereHas('farmercategories', function($q) use ($request) {
                         $q->where('farmercategory_id', $request->category_id);
                     });
@@ -1631,7 +1631,7 @@ class ApiController extends Controller
                     'total' => $users->count(),
                     'data' => $users
                 ]);
-            }elseif($request->filled('lat_one') && $request->filled('lon_one')){
+            }elseif($request->has('lat_one') && $request->has('lon_one')){
                     $lat1 = $request->lat_one;
                     $lon1 = $request->lon_one;
                     $radius = $request->radius;
@@ -1661,7 +1661,7 @@ class ApiController extends Controller
                     $query = User::with('userinfo')->whereIn('id', $ids)->where('status','Active');
 
                     // Category filter
-                    if ($request->filled('category_id')) {
+                    if ($request->has('category_id')) {
                         $query->whereHas('farmercategories', function($q) use ($request) {
                             $q->where('farmercategory_id', $request->category_id);
                         });
@@ -1744,4 +1744,22 @@ class ApiController extends Controller
     //         ], 500);
     //     }
     // }
+
+    // $request->validate([
+    //         'audio' => 'required|file|mimes:wav'
+    //     ]);
+
+    //     $file = $request->file('audio');
+
+    //     $response = Http::withToken(env('OPENAI_API_KEY'))
+    //         ->attach(
+    //             'file',
+    //             file_get_contents($file->getRealPath()),
+    //             $file->getClientOriginalName()
+    //         )
+    //         ->post('https://api.openai.com/v1/audio/transcriptions', [
+    //             'model' => 'gpt-4o-transcribe'
+    //         ]);
+
+    //     return $response->json();
 }
