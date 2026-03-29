@@ -1777,4 +1777,62 @@ class ApiController extends Controller
     //         ]);
 
     //     return $response->json();
+
+    public function userProfileUpdate(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [
+                'full_name' => 'required|string',
+                'email' => 'required|email',
+                'phone' => 'nullable|string',
+                'profile_image' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => 'Please fill all requirement fields', 
+                    'data' => $validator->errors()
+                ], 422);  
+            }
+
+            $user = user();
+
+            if($user->role != 'user'){
+                return response()->json(['status'=>false, 'user_id'=>0, 'message'=>'Only user allowed'],422);
+            } 
+
+            $countEmail = User::where('email',$request->email)->count();
+            $countPhone = User::where('phone',$request->phone)->count();
+
+            if($countEmail > 0){
+                return response()->json(['status'=>false, 'user_id'=>0, 'message'=>'Already the email has been exist'],422);
+            }
+
+            if($request->has('phone') && $countPhone > 0){
+                return response()->json(['status'=>false, 'user_id'=>0, 'message'=>'Already the phone has been exist'],422);
+            }
+
+            if ($request->file('profile_image')) {
+                $file = $request->file('profile_image');
+                $name = time() . "profile_". $file->getClientOriginalName();
+                $file->move(public_path() . '/uploads/farmers/', $name);
+                $path = 'uploads/farmers/' . $name;
+            }else{
+                $path = $user->image_path;
+            }
+
+            $user->name = $request->name;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->image_path = $path;
+            $user->update();
+
+            return response()->json(['status'=>true, 'user_id'=>intval($user->id), 'message'=>'Successfully updated']);
+
+        }catch(Exception $e){
+            return response()->json(['status'=>false, 'code'=>$e->getCode(), 'message'=>$e->getMessage()],500);
+        }
+    }
 }

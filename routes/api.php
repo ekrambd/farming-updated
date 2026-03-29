@@ -36,6 +36,8 @@ Route::middleware(['throttle:60,1'])->group(function () {
 	Route::middleware('auth:sanctum')->group( function (){
 
 		Route::get('/user-details', [ApiController::class, 'userDetails']);
+
+		Route::post('user-profile-update', [ApiController::class, 'userProfileUpdate']);
 		
 		Route::post('user-signout', [ApiController::class, 'userSignOut']);
 		Route::post('farmer-signout', [ApiController::class, 'farmerSignOut']);
