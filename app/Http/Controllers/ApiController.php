@@ -1823,7 +1823,7 @@ class ApiController extends Controller
                 $path = $user->image_path;
             }
 
-            $user->name = $request->name;
+            $user->full_name = $request->full_name;
             $user->email = $request->email;
             $user->phone = $request->phone;
             $user->image_path = $path;
