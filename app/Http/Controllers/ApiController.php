@@ -868,7 +868,7 @@ class ApiController extends Controller
                 'full_name' => 'required|string|max:50',
                 'email' => 'nullable|email',
                 'phone' => 'required',
-                'farmercategory_id' => 'required|integer|exists:farmercategories,id',
+                'farmercategory_id' => 'nullable|integer|exists:farmercategories,id',
                 'farmersubcategory_id' => 'nullable|integer|exists:farmersubcategories,id',
                 'address' => 'nullable',
                 'profile_image' => 'nullable',
