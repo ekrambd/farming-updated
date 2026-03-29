@@ -1818,6 +1818,9 @@ class ApiController extends Controller
                 $file = $request->file('profile_image');
                 $name = time() . "profile_". $file->getClientOriginalName();
                 $file->move(public_path() . '/uploads/farmers/', $name);
+                if($user->image_path != NULL){
+                    unlink(public_path($user->image_path));
+                }
                 $path = 'uploads/farmers/' . $name;
             }else{
                 $path = $user->image_path;
