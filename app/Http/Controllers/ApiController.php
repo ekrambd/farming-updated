@@ -892,7 +892,10 @@ class ApiController extends Controller
                 $file = $request->file('profile_image');
                 $name = time() . "profile_". $file->getClientOriginalName();
                 $file->move(public_path() . '/uploads/farmers/', $name);
-                unlink(public_path($user->image_path));
+                if($user->image_path != NULL){
+                    unlink(public_path($user->image_path));
+                }
+                
                 $path = 'uploads/farmers/' . $name;
             }else{
                 $path = $user->image_path;
@@ -912,7 +915,10 @@ class ApiController extends Controller
                 $file = $request->file('nid_front_photo');
                 $name = time() ."nid_front_". $file->getClientOriginalName();
                 $file->move(public_path() . '/uploads/farmers/', $name);
-                unlink(public_path($info->nid_front_photo));
+                if($info->nid_front_photo != NULL){
+                    unlink(public_path($info->nid_front_photo));
+                }
+                
                 $nidFrontPhoto = 'uploads/farmers/' . $name;
             }else{
                 $nidFrontPhoto = $info->nid_front_photo;
@@ -924,7 +930,10 @@ class ApiController extends Controller
                 $name = time() . "nid_back_". $file->getClientOriginalName();
                 $file->move(public_path() . '/uploads/farmers/', $name);
                 $nidBackPhoto = 'uploads/farmers/' . $name;
-                unlink(public_path($info->nid_back_photo));
+                if($info->nid_back_photo != NULL){
+                    unlink(public_path($info->nid_back_photo));
+                }
+                
             }else{
                 $nidBackPhoto = $info->nid_back_photo;
             }
@@ -935,7 +944,9 @@ class ApiController extends Controller
                 $name = time() ."trade_license_". $file->getClientOriginalName();
                 $file->move(public_path() . '/uploads/farmers/', $name);
                 $nidTradeLicensePhoto = 'uploads/farmers/' . $name;
-                unlink(public_path($info->trade_license_photo));
+                if($info->trade_license_photo != NULL){
+                    unlink(public_path($info->trade_license_photo));
+                }
             }else{
                 $nidTradeLicensePhoto = $info->trade_license_photo;
             }
