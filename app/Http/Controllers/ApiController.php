@@ -1803,8 +1803,8 @@ class ApiController extends Controller
                 return response()->json(['status'=>false, 'user_id'=>0, 'message'=>'Only user allowed'],422);
             } 
 
-            $countEmail = User::where('email',$request->email)->where('user_id','!=',$user->id)->count();
-            $countPhone = User::where('phone',$request->phone)->where('user_id','!=',$user->id)->count();
+            $countEmail = User::where('email',$request->email)->where('id','!=',$user->id)->count();
+            $countPhone = User::where('phone',$request->phone)->where('id','!=',$user->id)->count();
 
             if($countEmail > 0){
                 return response()->json(['status'=>false, 'user_id'=>0, 'message'=>'Already the email has been exist'],422);
